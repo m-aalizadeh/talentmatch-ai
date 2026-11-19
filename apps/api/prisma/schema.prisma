@@ -1,0 +1,117 @@
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+  moduleFormat = "cjs"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum ResumeStatus {
+  UPLOADED
+  PROCESSING
+  PROCESSED
+  FAILED
+}
+
+enum JobStatus {
+  DRAFT
+  ACTIVE
+  CLOSED
+}
+
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  name      String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  resumes       Resume[]
+  matchResults  MatchResult[]
+}
+
+model Resume {
+  id          String       @id @default(uuid())
+  fileName    String
+  fileUrl     String
+  status      ResumeStatus @default(UPLOADED)
+  userId      String
+  createdAt   DateTime     @default(now())
+
+  user        User          @relation(fields: [userId], references: [id])
+  skills      ResumeSkill[]
+  matchResults MatchResult[]
+}
+
+model Job {
+  id          String    @id @default(uuid())
+  title       String
+  description String
+  company     String?
+  status      JobStatus @default(DRAFT)
+  createdAt   DateTime  @default(now())
+
+  skills      JobSkill[]
+  matchResults MatchResult[]
+}
+
+model Skill {
+  id          String @id @default(uuid())
+  name        String @unique
+
+  resumeSkills ResumeSkill[]
+  jobSkills    JobSkill[]
+  skillGaps    SkillGap[]
+}
+
+model ResumeSkill {
+  id        String  @id @default(uuid())
+  resumeId  String
+  skillId   String
+  level     String?
+
+  resume    Resume @relation(fields: [resumeId], references: [id])
+  skill     Skill  @relation(fields: [skillId], references: [id])
+
+  @@unique([resumeId, skillId])
+}
+
+model JobSkill {
+  id       String  @id @default(uuid())
+  jobId    String
+  skillId  String
+  required Boolean @default(true)
+
+  job      Job    @relation(fields: [jobId], references: [id])
+  skill    Skill  @relation(fields: [skillId], references: [id])
+
+  @@unique([jobId, skillId])
+}
+
+model MatchResult {
+  id          String   @id @default(uuid())
+  userId      String
+  resumeId    String
+  jobId       String
+  score       Float
+  createdAt   DateTime @default(now())
+
+  user        User      @relation(fields: [userId], references: [id])
+  resume      Resume    @relation(fields: [resumeId], references: [id])
+  job         Job       @relation(fields: [jobId], references: [id])
+  skillGaps   SkillGap[]
+}
+
+model SkillGap {
+  id            String @id @default(uuid())
+  matchResultId String
+  skillId       String
+
+  matchResult   MatchResult @relation(fields: [matchResultId], references: [id])
+  skill         Skill       @relation(fields: [skillId], references: [id])
+
+  @@unique([matchResultId, skillId])
+}
