@@ -6,9 +6,11 @@ import {
   Post,
   Inject,
   ValidationPipe,
+  Patch,
 } from '@nestjs/common';
 import { JobsService } from './jobs.service';
 import { CreateJobDto } from './dto/create-job.dto';
+import { UpdateJobDto } from './dto/update-job.dto';
 
 @Controller('jobs')
 export class JobsController {
@@ -36,5 +38,15 @@ export class JobsController {
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.jobsService.findOne(id);
+  }
+
+  @Patch(':id')
+  update(@Param('id') id: string, @Body() dto: UpdateJobDto) {
+    return this.jobsService.update(id, dto);
+  }
+
+  @Patch(':id/close')
+  close(@Param('id') id: string) {
+    return this.jobsService.close(id);
   }
 }
