@@ -7,15 +7,25 @@ import {
   Inject,
   ValidationPipe,
   Patch,
+  UseGuards,
+  Request,
 } from '@nestjs/common';
 import { JobsService } from './jobs.service';
 import { CreateJobDto } from './dto/create-job.dto';
 import { UpdateJobDto } from './dto/update-job.dto';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guards';
 
+interface AuthenticatedRequest {
+  user: {
+    userId: string;
+    email: string;
+  };
+}
 @Controller('jobs')
 export class JobsController {
   constructor(@Inject(JobsService) private readonly jobsService: JobsService) {}
 
+  @UseGuards(JwtAuthGuard)
   @Post()
   create(
     @Body(
@@ -26,8 +36,9 @@ export class JobsController {
       }),
     )
     dto: CreateJobDto,
+    @Request() req: AuthenticatedRequest,
   ) {
-    return this.jobsService.create(dto);
+    return this.jobsService.create(dto, req.user.userId);
   }
 
   @Get()
@@ -40,13 +51,19 @@ export class JobsController {
     return this.jobsService.findOne(id);
   }
 
+  @UseGuards(JwtAuthGuard)
   @Patch(':id')
-  update(@Param('id') id: string, @Body() dto: UpdateJobDto) {
-    return this.jobsService.update(id, dto);
+  update(
+    @Param('id') id: string,
+    @Body() dto: UpdateJobDto,
+    @Request() req: AuthenticatedRequest,
+  ) {
+    return this.jobsService.update(id, dto, req.user.userId);
   }
 
+  @UseGuards(JwtAuthGuard)
   @Patch(':id/close')
-  close(@Param('id') id: string) {
-    return this.jobsService.close(id);
+  close(@Param('id') id: string, @Request() req: AuthenticatedRequest) {
+    return this.jobsService.close(id, req.user.userId);
   }
 }

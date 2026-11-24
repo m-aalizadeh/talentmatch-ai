@@ -7,12 +7,13 @@ import { UpdateJobDto } from './dto/update-job.dto';
 export class JobsService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async create(dto: CreateJobDto) {
+  async create(dto: CreateJobDto, userId: string) {
     return this.prisma.job.create({
       data: {
         title: dto.title,
         description: dto.description,
         company: dto.company,
+        userId,
       },
     });
   }
@@ -36,8 +37,8 @@ export class JobsService {
     return job;
   }
 
-  async update(id: string, dto: UpdateJobDto) {
-    const job = await this.prisma.job.findUnique({ where: { id } });
+  async update(id: string, dto: UpdateJobDto, userId: string) {
+    const job = await this.prisma.job.findUnique({ where: { id, userId } });
     if (!job) {
       throw new NotFoundException('Job not found!');
     }
@@ -48,8 +49,8 @@ export class JobsService {
     });
   }
 
-  async close(id: string) {
-    const job = await this.prisma.job.findUnique({ where: { id } });
+  async close(id: string, userId: string) {
+    const job = await this.prisma.job.findUnique({ where: { id, userId } });
     if (!job) {
       throw new NotFoundException('Job not found');
     }
