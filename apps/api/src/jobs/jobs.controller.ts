@@ -9,12 +9,13 @@ import {
   Patch,
   UseGuards,
   Request,
+  Query,
 } from '@nestjs/common';
 import { JobsService } from './jobs.service';
 import { CreateJobDto } from './dto/create-job.dto';
 import { UpdateJobDto } from './dto/update-job.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guards';
-
+import { QueryJobsDto } from './dto/query-jobs.dto';
 interface AuthenticatedRequest {
   user: {
     userId: string;
@@ -42,8 +43,11 @@ export class JobsController {
   }
 
   @Get()
-  findAll() {
-    return this.jobsService.findAll();
+  findAll(
+    @Query(new ValidationPipe({ whitelist: true, transform: true }))
+    query: QueryJobsDto,
+  ) {
+    return this.jobsService.findAll(query);
   }
 
   @Get(':id')
