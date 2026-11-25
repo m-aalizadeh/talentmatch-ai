@@ -54,8 +54,8 @@ model Job {
   company     String?
   status      JobStatus @default(DRAFT)
   createdAt   DateTime  @default(now())
-  userId      String?
-  user        User?     @relation(fields: [userId], references: [id], onDelete: Restrict)
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Restrict)
   skills      JobSkill[]
   matchResults MatchResult[]
   @@index([userId])
