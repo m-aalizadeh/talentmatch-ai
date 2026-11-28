@@ -14,7 +14,7 @@
     "outDir": "./dist",
     "rootDir": "./src",
     "incremental": true,
-    "types": ["node"]
+    "types": ["node", "multer"]
   },
   "include": ["src/**/*.ts"],
   "exclude": ["node_modules", "dist", "test", "**/*.spec.ts"]
